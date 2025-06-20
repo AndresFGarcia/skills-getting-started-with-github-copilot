@@ -157,8 +157,8 @@ footer {
 }
 
 .participants-list {
-  list-style-type: disc;
-  margin-left: 20px;
+  list-style-type: none;
+  margin-left: 0;
   color: #444;
   font-size: 0.97em;
   padding-left: 0;
@@ -167,4 +167,18 @@ footer {
 .participants-list li {
   margin-bottom: 2px;
   word-break: break-all;
+  display: flex;
+  align-items: center;
+}
+
+.delete-icon {
+  color: #c62828;
+  font-size: 1.1em;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.delete-icon:hover {
+  color: #a31515;
 }

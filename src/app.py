@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 import os
 from pathlib import Path
+from typing import Dict, List, Any
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
@@ -20,7 +21,7 @@ app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
           "static")), name="static")
 
 # In-memory activity database
-activities = {
+activities: Dict[str, Dict[str, Any]] = {
     "Chess Club": {
         "description": "Learn strategies and compete in chess tournaments",
         "schedule": "Fridays, 3:30 PM - 5:00 PM",
@@ -87,7 +88,7 @@ def root():
 
 
 @app.get("/activities")
-def get_activities():
+def get_activities() -> Dict[str, Dict[str, Any]]:
     return activities
 
 
@@ -99,12 +100,24 @@ def signup_for_activity(activity_name: str, email: str):
         raise HTTPException(status_code=404, detail="Activity not found")
 
     # Get the specific activity
-    activity = activities[activity_name]
+    activity: Dict[str, Any] = activities[activity_name]
 
     # Validate student is not already signed up
-    if email in activity["participants"]:
+    participants: List[str] = activity["participants"]
+    if email in participants:
         raise HTTPException(status_code=400, detail="Student already signed up")
-
-    # Add student
-    activity["participants"].append(email)
+    participants.append(email)
     return {"message": f"Signed up {email} for {activity_name}"}
+
+
+@app.post("/activities/{activity_name}/unregister")
+def unregister_from_activity(activity_name: str, email: str):
+    """Unregister a student from an activity"""
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    activity: Dict[str, Any] = activities[activity_name]
+    participants: List[str] = activity["participants"]
+    if email not in participants:
+        raise HTTPException(status_code=400, detail="Student not registered")
+    participants.remove(email)
+    return {"message": f"Unregistered {email} from {activity_name}"}
